@@ -32,6 +32,5 @@
 ## Technologies Used:
 
 1. Golang
-2. GraphQL
 3. MYSQL 
 4. React-JS
