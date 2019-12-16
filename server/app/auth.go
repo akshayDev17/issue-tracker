@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+
 	"net/http"
 	"os"
 	"server/models"
@@ -21,6 +22,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		//check if request does not need authentication, serve the request if it doesn't need it
 		for _, value := range notAuth {
+			fmt.Println("I AM HERE AT NO AUTH LOOP")
 
 			if value == requestPath {
 				next.ServeHTTP(w, r)
@@ -28,12 +30,15 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			}
 		}
 
+		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
+
 		response := make(map[string]interface{})
 		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
 		if tokenHeader == "" { //Token is missing, returns with error code 403 Unauthorized
 			response = u.Message(false, "Missing auth token")
 			w.WriteHeader(http.StatusForbidden)
+			fmt.Println("Missing Token")
 			w.Header().Add("Content-Type", "application/json")
 			u.Respond(w, response)
 			return

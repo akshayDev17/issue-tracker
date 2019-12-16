@@ -16,6 +16,11 @@ func main() {
 
 	router.HandleFunc("/register", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/login", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/projects/new", controllers.CreateProject).Methods("POST")
+	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
+	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
+	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
+	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 

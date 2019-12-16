@@ -3,6 +3,7 @@ package models
 import (
 	"os"
 	u "server/utils"
+	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
@@ -24,6 +25,7 @@ type Account struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Token    string `json:"token";sql:"-"`
+	JobType  string `json:"jd"`
 }
 
 //Validate incoming user details...
@@ -41,7 +43,7 @@ func (account *Account) Validate() (map[string]interface{}, bool) {
 	temp := &Account{}
 
 	//check for errors, duplicate email
-	err := GetDB().Table("userdb").Where("email = ?", account.Email).First(temp).Error
+	err := GetDB().Table("user_db").Where("email = ?", account.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
@@ -51,7 +53,7 @@ func (account *Account) Validate() (map[string]interface{}, bool) {
 
 	temp = &Account{}
 	// check unique usaername
-	err = GetDB().Table("userdb").Where("username = ?", account.Username).First(temp).Error
+	err = GetDB().Table("user_db").Where("username = ?", account.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
@@ -75,7 +77,9 @@ func (account *Account) Create() map[string]interface{} {
 		return u.Message(false, "Failed to create account, connection error.")
 	}
 
-	GetDB().Table("userdb").Create(account)
+	account.JobType = "Intern"
+
+	GetDB().Table("user_db").Create(account)
 
 	//Create new JWT token for the newly registered account
 	tk := &Token{UserId: account.ID}
@@ -93,7 +97,7 @@ func (account *Account) Create() map[string]interface{} {
 func Login(email, password string) map[string]interface{} {
 
 	account := &Account{}
-	err := GetDB().Table("userdb").Where("email = ?", email).First(account).Error
+	err := GetDB().Table("user_db").Where("email = ?", email).First(account).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Email address not found")
@@ -111,7 +115,10 @@ func Login(email, password string) map[string]interface{} {
 	//Create JWT token
 	tk := &Token{UserId: account.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
+	fmt.Println("\n",token,"\n")
+	fmt.Println("\n", os.Getenv("token_password"), "\n")
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
+	fmt.Println("\n", tokenString, "\n")
 	account.Token = tokenString //Store the token in the response
 
 	resp := u.Message(true, "Logged In")
@@ -122,7 +129,7 @@ func Login(email, password string) map[string]interface{} {
 func GetUser(u uint) *Account {
 
 	acc := &Account{}
-	GetDB().Table("userdb").Where("id = ?", u).First(acc)
+	GetDB().Table("user_db").Where("id = ?", u).First(acc)
 	if acc.Email == "" { //User not found!
 		return nil
 	}
