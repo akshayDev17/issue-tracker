@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	u "server/utils"
+	u "my_app/utils"
 
 	"github.com/jinzhu/gorm"
 )
@@ -92,13 +92,37 @@ func (issue *Issue) Create() map[string]interface{} {
 }
 
 // given a task, fetch all issues related to it
-func GetAllIssues(project_id int) []*Issue {
+func GetAllIssues(project_id int, requesting_uid int) map[string]interface{} {
+	// check if the requested project exists
+	projects := make([]*UserProjectTable, 0)
+	err := GetDB().Table("project_participants_db").Where("project_id = ?", project_id).Find(&projects).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return u.Message(false, "Project with given id not found")
+		}
+		return u.Message(false, "Connection error, please retry.")
+	}
+
+	init_flag := false
+	// get project participants of the given project
+	for _, participant_id := range projects {
+		if participant_id.UserID == requesting_uid {
+			init_flag = true
+			break
+		}
+	}
+
+	if !init_flag {
+		return u.Message(false, "Illegal request made by non-project Participant")
+	}
+
 	issues := make([]*Issue, 0)
-	err := GetDB().Table("issue_db").Where("project_id = ?", project_id).Find(&issues).Error
+	err = GetDB().Table("issue_db").Where("project_id = ?", project_id).Find(&issues).Error
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-
-	return issues
+	resp := u.Message(true, "Here are the issues.")
+	resp["issues"] = issues
+	return resp
 }

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"server/models"
-	u "server/utils"
+	"my_app/models"
+	u "my_app/utils"
 	"strconv"
 )
 

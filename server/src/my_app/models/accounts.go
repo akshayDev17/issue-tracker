@@ -1,9 +1,8 @@
 package models
 
 import (
+	u "my_app/utils"
 	"os"
-	u "server/utils"
-	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
@@ -115,10 +114,7 @@ func Login(email, password string) map[string]interface{} {
 	//Create JWT token
 	tk := &Token{UserId: account.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	fmt.Println("\n",token,"\n")
-	fmt.Println("\n", os.Getenv("token_password"), "\n")
 	tokenString, _ := token.SignedString([]byte(os.Getenv("token_password")))
-	fmt.Println("\n", tokenString, "\n")
 	account.Token = tokenString //Store the token in the response
 
 	resp := u.Message(true, "Logged In")

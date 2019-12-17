@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"my_app/app"
+	"my_app/controllers"
 	"net/http"
 	"os"
-	"server/app"
-	"server/controllers"
 
 	"github.com/gorilla/mux"
 )

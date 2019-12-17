@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"my_app/models"
+	u "my_app/utils"
 	"net/http"
-	"server/models"
-	u "server/utils"
 )
 
 var CreateAccount = func(w http.ResponseWriter, r *http.Request) {

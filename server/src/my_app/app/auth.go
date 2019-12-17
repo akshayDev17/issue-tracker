@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"my_app/models"
+	u "my_app/utils"
 	"net/http"
 	"os"
-	"server/models"
-	u "server/utils"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"

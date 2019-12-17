@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	u "server/utils"
+	u "my_app/utils"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"

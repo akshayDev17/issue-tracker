@@ -3,9 +3,9 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"my_app/models"
+	u "my_app/utils"
 	"net/http"
-	"server/models"
-	u "server/utils"
 	"strconv"
 )
 
@@ -34,14 +34,14 @@ var CreateIssue = func(w http.ResponseWriter, r *http.Request) {
 // get issues for a project assigned to a user
 var GetIssuesFor = func(w http.ResponseWriter, r *http.Request) {
 
+	temp_uid := r.Context().Value("user").(uint)
+	requesting_user_id := int(temp_uid)
 	pr_id := r.Header.Get("project_id")
 	project_id, err := strconv.Atoi(pr_id)
 	if err != nil {
 		fmt.Println(err)
 		u.Respond(w, u.Message(false, "problem converting project id specified at header"))
 	}
-	data := models.GetAllIssues(project_id)
-	resp := u.Message(true, "success")
-	resp["data"] = data
+	resp := models.GetAllIssues(project_id, requesting_user_id)
 	u.Respond(w, resp)
 }

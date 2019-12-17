@@ -84,7 +84,6 @@ func (p *Parser) ParseWithClaims(tokenString string, claims Claims, keyFunc Keyf
 		return token, nil
 	}
 
-
 	return token, vErr
 }
 

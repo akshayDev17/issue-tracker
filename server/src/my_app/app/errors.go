@@ -1,8 +1,8 @@
 package app
 
 import (
+	u "my_app/utils"
 	"net/http"
-	u "server/utils"
 )
 
 var NotFoundHandler = func(next http.Handler) http.Handler {
