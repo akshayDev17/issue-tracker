@@ -6,11 +6,10 @@ import (
 	"my_app/models"
 	u "my_app/utils"
 	"net/http"
-	"strconv"
 )
 
 var CreateIssue = func(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("Here")
 	//Grab the id of the user that send the request
 	// i.e. created the issue
 	user1 := r.Context().Value("user").(uint)
@@ -33,15 +32,21 @@ var CreateIssue = func(w http.ResponseWriter, r *http.Request) {
 
 // get issues for a project assigned to a user
 var GetIssuesFor = func(w http.ResponseWriter, r *http.Request) {
+	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	temp_uid := r.Context().Value("user").(uint)
-	requesting_user_id := int(temp_uid)
-	pr_id := r.Header.Get("project_id")
-	project_id, err := strconv.Atoi(pr_id)
-	if err != nil {
-		fmt.Println(err)
-		u.Respond(w, u.Message(false, "problem converting project id specified at header"))
-	}
-	resp := models.GetAllIssues(project_id, requesting_user_id)
+	fmt.Println(temp_uid)
+	// requesting_user_id := int(temp_uid)
+	// pr_id := "2"
+	// project_id, err := strconv.Atoi(pr_id)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	u.Respond(w, u.Message(false, "problem converting project id specified at header"))
+	// }
+	// resp := models.GetAllIssues(project_id, requesting_user_id)
+	resp := u.Message(true, "xyz")
+	resp["data"] = "Abid"
 	u.Respond(w, resp)
 }

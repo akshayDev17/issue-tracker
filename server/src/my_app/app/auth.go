@@ -16,10 +16,10 @@ import (
 var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		fmt.Println("Here111")
 		notAuth := []string{"/register", "/login"} //List of endpoints that doesn't require auth
 		requestPath := r.URL.Path                  //current request path
-
+		fmt.Println(requestPath)
 		//check if request does not need authentication, serve the request if it doesn't need it
 		for _, value := range notAuth {
 			fmt.Println("I AM HERE AT NO AUTH LOOP")
@@ -30,10 +30,15 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			}
 		}
 
+		for name, value := range w.Header() {
+			// Loop over all values for the name.
+			fmt.Println(name, " ", value)
+		}
+
 		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})
-		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
+		tokenHeader := r.Header.Get("Authentication") //Grab the token from the header
 
 		if tokenHeader == "" { //Token is missing, returns with error code 403 Unauthorized
 			response = u.Message(false, "Missing auth token")

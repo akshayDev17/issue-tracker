@@ -2,25 +2,32 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"my_app/app"
 	"my_app/controllers"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
-
 	router := mux.NewRouter()
 
+	cors := handlers.CORS(
+		handlers.AllowedHeaders([]string{"*"}),
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowCredentials(),
+		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+	)
+	router.Use(cors)
+
+	router.HandleFunc("/", controllers.GetIssuesFor).Methods("POST", "OPTIONS")
 	router.HandleFunc("/register", controllers.CreateAccount).Methods("POST")
 	router.HandleFunc("/login", controllers.Authenticate).Methods("POST")
 	router.HandleFunc("/projects/new", controllers.CreateProject).Methods("POST")
 	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
 	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
 	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
-	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
@@ -33,8 +40,13 @@ func main() {
 
 	fmt.Println(port)
 
-	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:8000/api
+	// headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
+	// methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
 		fmt.Print(err)
 	}
+	fmt.Println("Here")
 }
