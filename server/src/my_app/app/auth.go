@@ -30,7 +30,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			}
 		}
 
-		for name, value := range w.Header() {
+		for name, value := range r.Header {
 			// Loop over all values for the name.
 			fmt.Println(name, " ", value)
 		}
