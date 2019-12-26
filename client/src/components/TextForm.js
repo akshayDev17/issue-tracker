@@ -5,10 +5,10 @@ export class TextForm extends Component {
   onSubmit = event => {
     const form = event.target;
     event.preventDefault();
-    const AuthStr = 'Abid eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjN9.pPPqcjJdQc_t2JWc7qtvJPziU3B36LgSM9vZYcpxNac';
+    const AuthStr = '"Abid" eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjN9.pPPqcjJdQc_t2JWc7qtvJPziU3B36LgSM9vZYcpxNac';
     const url = '/';
 
-    axios.post(url,{a: 10}, {headers: {"Authentication":"fedsagvwegv fcesaf" } }).then(resp => {
+    axios.post(url,{a: 10}, {headers: {"Authorization":AuthStr } }).then(resp => {
       console.log(resp)
     });
     this.props.onSubmit(form.input.value);

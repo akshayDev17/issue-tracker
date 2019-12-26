@@ -40,10 +40,6 @@ func main() {
 
 	fmt.Println(port)
 
-	// headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
-	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
-	// methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
-
 	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
 		fmt.Print(err)

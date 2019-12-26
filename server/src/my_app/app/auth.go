@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 
 	"my_app/models"
 	u "my_app/utils"
@@ -17,7 +16,7 @@ import (
 var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Here111")
+
 		notAuth := []string{"/register", "/login"} //List of endpoints that doesn't require auth
 		requestPath := r.URL.Path                  //current request path
 		fmt.Println(requestPath)
@@ -30,22 +29,6 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 				return
 			}
 		}
-
-		for name, value := range r.Header {
-			// Loop over all values for the name.
-			fmt.Println(name, " ", value)
-		}
-
-		body, err := ioutil.ReadAll(r.Body)
-
-		if err != nil {
-			panic(err)
-			return
-		}
-
-		fmt.Println(string(body))
-
-		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})
 		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
