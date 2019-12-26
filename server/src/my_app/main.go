@@ -14,7 +14,7 @@ func main() {
 	router := mux.NewRouter()
 
 	cors := handlers.CORS(
-		handlers.AllowedHeaders([]string{"*"}),
+		handlers.AllowedHeaders([]string{"Authorization"}),
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),

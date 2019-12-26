@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 
 	"my_app/models"
 	u "my_app/utils"
@@ -35,10 +36,19 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			fmt.Println(name, " ", value)
 		}
 
+		body, err := ioutil.ReadAll(r.Body)
+
+		if err != nil {
+			panic(err)
+			return
+		}
+
+		fmt.Println(string(body))
+
 		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})
-		tokenHeader := r.Header.Get("Authentication") //Grab the token from the header
+		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
 		if tokenHeader == "" { //Token is missing, returns with error code 403 Unauthorized
 			response = u.Message(false, "Missing auth token")
