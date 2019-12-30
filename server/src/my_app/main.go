@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -14,13 +15,21 @@ func main() {
 
 	router := mux.NewRouter()
 
+	cors := handlers.CORS(
+		handlers.AllowedHeaders([]string{"Authorization"}),
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowCredentials(),
+		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
+	)
+	router.Use(cors)
+
 	router.HandleFunc("/register", controllers.CreateAccount).Methods("POST")
-	router.HandleFunc("/login", controllers.Authenticate).Methods("POST")
+	router.HandleFunc("/login", controllers.Authenticate).Methods("POST", "OPTIONS")
 	router.HandleFunc("/projects/new", controllers.CreateProject).Methods("POST")
 	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
 	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
 	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
-	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
+	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("POST", "OPTIONS")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 

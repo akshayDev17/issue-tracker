@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-
 	"my_app/models"
 	u "my_app/utils"
 	"net/http"
@@ -33,6 +32,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})
+
 		tokenHeader := r.Header.Get("Authorization") //Grab the token from the header
 
 		if tokenHeader == "" { //Token is missing, returns with error code 403 Unauthorized

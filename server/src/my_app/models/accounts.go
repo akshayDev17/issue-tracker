@@ -93,10 +93,10 @@ func (account *Account) Create() map[string]interface{} {
 	return response
 }
 
-func Login(email, password string) map[string]interface{} {
+func Login(username string, password string) map[string]interface{} {
 
 	account := &Account{}
-	err := GetDB().Table("user_db").Where("email = ?", email).First(account).Error
+	err := GetDB().Table("user_db").Where("username = ?", username).First(account).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Email address not found")

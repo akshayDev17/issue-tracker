@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"my_app/models"
 	u "my_app/utils"
 	"net/http"
@@ -25,10 +26,11 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	account := &models.Account{}
 	err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
 	if err != nil {
+		fmt.Println(err)
 		u.Respond(w, u.Message(false, "Invalid request"))
 		return
 	}
-
-	resp := models.Login(account.Email, account.Password)
+	fmt.Println(account.Username)
+	resp := models.Login(account.Username, account.Password)
 	u.Respond(w, resp)
 }
