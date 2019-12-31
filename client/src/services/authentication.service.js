@@ -8,6 +8,7 @@ const currentUserSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('
 export const authenticationService = {
     login,
     logout,
+    register,
     currentUser: currentUserSubject.asObservable(),
     get currentUserValue() { return currentUserSubject.value }
 };
@@ -37,4 +38,16 @@ function logout() {
     // remove user from local storage to log user out
     localStorage.removeItem('currentUser');
     currentUserSubject.next(null);
+}
+
+function register(username, email, password) {
+    const requestOptions = {
+        "username": username,
+        "email":email,
+        "password":password
+    };
+
+    const url="/register";
+
+    return axios.post(url, requestOptions).then((resp) => console.log(resp));
 }

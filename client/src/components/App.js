@@ -2,6 +2,7 @@ import React from 'react';
 import { Router, Link, Route } from 'react-router-dom';
 
 import { LoginPage } from './LoginPage';
+import { SignUpPage } from './SignUpPage';
 import { history } from './History';
 import { authenticationService } from '../services/authentication.service';
 import { PrivateRoute } from './PrivateRoute';
@@ -45,6 +46,7 @@ export class App extends React.Component {
                 <div className="col-md-6 offset-md-3">
                   <PrivateRoute exact path="/" component={HomePage} />
                   <Route path="/login" component={LoginPage} />
+                  <Route path="/signup" component={SignUpPage}/>
                 </div>
               </div>
             </div>

@@ -2,9 +2,10 @@ import React from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-import { authenticationService } from '../services/authentication.service';
+import { authenticationService } from '../services/authentication.service'
 
-export class LoginPage extends React.Component {
+export class SignUpPage extends React.Component {
+
     constructor(props) {
         super(props);
 
@@ -13,48 +14,37 @@ export class LoginPage extends React.Component {
             this.props.history.push('/');
         }
     }
-
-    signUp = () => {
-        // redirect to home if already logged in
-        if (authenticationService.currentUserValue) {
-            this.props.history.push('/');
-        }
-        else{
-            this.props.history.push('/signup');
-        }
-    }
-
     render() {
         return (
             <div>
-                <div className="alert alert-info">
-                    Username: test<br />
-                    Password: test
-                </div>
-                <h2>Login</h2>
+                <h2>SignUp</h2>
                 <Formik
                     initialValues={{
                         username: '',
-                        password: ''
+                        email: '',
+                        password1: '',
+                        password2: ''
                     }}
                     validationSchema={Yup.object().shape({
                         username: Yup.string().required('Username is required'),
-                        password: Yup.string().required('Password is required')
+                        email: Yup.string().required('Email is required'),
+                        password1: Yup.string().required('Password is required'),
+                        password2: Yup.string().required('Please re-enter password').oneOf([Yup.ref("password1"), null], "Passwords must match")
                     })}
-                    onSubmit={({ username, password }, { setStatus, setSubmitting, serverRequest }) => {
+                    onSubmit={({ username, email, password1, password2 }, { setStatus, setSubmitting }) => {
                         setStatus();
-                        authenticationService.login(username, password)
-                            .then(
-                                user => {
-                                    const { from } = this.props.location.state || { from: { pathname: "/" } };
-                                    // console.log(user.data.account);
-                                    this.props.history.push(from);
-                                },
-                                error => {
-                                    setSubmitting(false);
-                                    setStatus(error);
-                                }
-                            );
+                        authenticationService.register(username, email, password1).then(
+                            user => {
+                                const { from } = this.props.location.state || { from: { pathname: "/" } };
+                                // console.log(user.data.account);
+                                this.props.history.push(from);
+                            },
+                            error => {
+                                setSubmitting(false);
+                                setStatus(error);
+                            }
+                        );
+
                     }}
                     render={({ errors, status, touched, isSubmitting }) => (
                         <Form>
@@ -64,12 +54,22 @@ export class LoginPage extends React.Component {
                                 <ErrorMessage name="username" component="div" className="invalid-feedback" />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="password">Password</label>
-                                <Field name="password" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')} />
+                                <label htmlFor="email">Email</label>
+                                <Field name="email" type="email" className={'form-control' + (errors.email && touched.email ? ' is-invalid' : '')} />
+                                <ErrorMessage name="email" component="div" className="invalid-feedback" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password1">Password</label>
+                                <Field name="password1" type="password" className={'form-control' + (errors.password1 && touched.password1 ? ' is-invalid' : '')} />
                                 <ErrorMessage name="password" component="div" className="invalid-feedback" />
                             </div>
                             <div className="form-group">
-                                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>Login</button>
+                                <label htmlFor="password2">Re-enter Password to confirm</label>
+                                <Field name="password2" type="password" className={'form-control' + (errors.password2 && touched.password2 ? ' is-invalid' : '')} />
+                                <ErrorMessage name="password2" component="div" className="invalid-feedback" />
+                            </div>
+                            <div className="form-group">
+                                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>SignUp</button>
                                 {isSubmitting &&
                                     <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" alt="" />
                                 }
@@ -80,8 +80,8 @@ export class LoginPage extends React.Component {
                         </Form>
                     )}
                 />
-                <button className="btn btn-success" onClick={this.signUp}>Signup</button>
             </div>
+
         )
     }
 }
