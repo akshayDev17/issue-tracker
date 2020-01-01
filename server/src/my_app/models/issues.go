@@ -92,15 +92,12 @@ func (issue *Issue) Create() map[string]interface{} {
 }
 
 // given a task, fetch all issues related to it
-func GetAllIssues(project_id int, requesting_uid int) map[string]interface{} {
+func GetAllIssues(project_id int, requesting_uid int) []*Issue {
 	// check if the requested project exists
 	projects := make([]*UserProjectTable, 0)
 	err := GetDB().Table("project_participants_db").Where("project_id = ?", project_id).Find(&projects).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Project with given id not found")
-		}
-		return u.Message(false, "Connection error, please retry.")
+		return nil
 	}
 
 	init_flag := false
@@ -113,7 +110,7 @@ func GetAllIssues(project_id int, requesting_uid int) map[string]interface{} {
 	}
 
 	if !init_flag {
-		return u.Message(false, "Illegal request made by non-project Participant")
+		return nil
 	}
 
 	issues := make([]*Issue, 0)
@@ -122,7 +119,5 @@ func GetAllIssues(project_id int, requesting_uid int) map[string]interface{} {
 		fmt.Println(err)
 		return nil
 	}
-	resp := u.Message(true, "Here are the issues.")
-	resp["issues"] = issues
-	return resp
+	return issues
 }

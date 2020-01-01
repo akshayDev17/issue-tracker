@@ -7,6 +7,7 @@ import { history } from './History';
 import { authenticationService } from '../services/authentication.service';
 import { PrivateRoute } from './PrivateRoute';
 import { HomePage } from './HomePage';
+import { Issues } from './Issues';
 
 export class App extends React.Component {
 
@@ -42,13 +43,10 @@ export class App extends React.Component {
           }
           <div className="jumbotron">
             <div className="container">
-              <div className="row">
-                <div className="col-md-6 offset-md-3">
                   <PrivateRoute exact path="/" component={HomePage} />
                   <Route path="/login" component={LoginPage} />
                   <Route path="/signup" component={SignUpPage}/>
-                </div>
-              </div>
+                  <Route path="/issues" component={Issues} />
             </div>
           </div>
         </div>

@@ -29,6 +29,14 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			}
 		}
 
+		// // Loop over header names
+		// for name, values := range r.Header {
+		// 	// Loop over all values for the name.
+		// 	for _, value := range values {
+		// 		fmt.Println(name, value)
+		// 	}
+		// }
+
 		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})

@@ -16,7 +16,7 @@ func main() {
 	router := mux.NewRouter()
 
 	cors := handlers.CORS(
-		handlers.AllowedHeaders([]string{"Authorization"}),
+		handlers.AllowedHeaders([]string{"Authorization", "project_id"}),
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 		handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}),
@@ -29,7 +29,7 @@ func main() {
 	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
 	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
 	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
-	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("POST", "OPTIONS")
+	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
 
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
