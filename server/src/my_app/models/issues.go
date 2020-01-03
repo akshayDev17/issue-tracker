@@ -3,22 +3,21 @@ package models
 import (
 	"fmt"
 	u "my_app/utils"
-
 	"github.com/jinzhu/gorm"
 )
 
 type Issue struct {
 	gorm.Model
-	Name           string `json:"issueName"`
-	Desc           string `json:"issueDesc"`
+	Name           string `json:"name"`
+	Desc           string `json:"desc"`
 	TaskType       int    `json:"task_type"`
 	ProjectID      int    `json:"project_id"`
 	CreatedBy      int
-	AssignedUserId int `json:"assigned_to_uid"`
+	AssignedUserId int `json:"assigned_to"`
 }
 
 func (issue *Issue) Validate() (map[string]interface{}, bool) {
-
+	db := GetDB()
 	//check for empty issue name
 	if len(issue.Name) == 0 {
 		return u.Message(false, "Issue name cannot be empty!"), false
@@ -31,7 +30,7 @@ func (issue *Issue) Validate() (map[string]interface{}, bool) {
 
 	// check if issue created is for an existing project or not
 	temp_project := &Project{}
-	err := GetDB().Table("project_db").Where("id = ?", issue.ProjectID).First(temp_project).Error
+	err := db.Table("projects").Where("id = ?", issue.ProjectID).First(temp_project).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Project does not exist"), false
@@ -41,7 +40,7 @@ func (issue *Issue) Validate() (map[string]interface{}, bool) {
 
 	// get all participants of the above requested project
 	users_list := make([]*UserProjectTable, 0)
-	GetDB().Table("project_participants_db").Where("project_id = ?", issue.ProjectID).Find(&users_list)
+	db.Table("project_participants").Where("project_id = ?", issue.ProjectID).Find(&users_list)
 
 	// get above requested project owner id
 	proj_owner_id, creator_id, assigned_to_uid := temp_project.CreatedBy, issue.CreatedBy, issue.AssignedUserId
@@ -78,13 +77,14 @@ func (issue *Issue) Validate() (map[string]interface{}, bool) {
 }
 
 func (issue *Issue) Create() map[string]interface{} {
-	// validate issue
+	
+	db := GetDB()
 	if resp, ok := issue.Validate(); !ok {
 		return resp
 	}
 
 	// add the issue to database
-	GetDB().Table("issue_db").Create(issue)
+	db.Create(&issue)
 
 	response := u.Message(true, "Issue has been created")
 	response["issue"] = issue
@@ -94,9 +94,10 @@ func (issue *Issue) Create() map[string]interface{} {
 // given a task, fetch all issues related to it
 func GetAllIssues(project_id int, requesting_uid int) []*Issue {
 	// check if the requested project exists
+	db := GetDB()
 	projects := make([]*UserProjectTable, 0)
-	err := GetDB().Table("project_participants_db").Where("project_id = ?", project_id).Find(&projects).Error
-	if err != nil {
+	
+	if err := db.Table("project_participants").Where("project_id = ?", project_id).Find(&projects).Error; err != nil {
 		return nil
 	}
 
@@ -114,10 +115,51 @@ func GetAllIssues(project_id int, requesting_uid int) []*Issue {
 	}
 
 	issues := make([]*Issue, 0)
-	err = GetDB().Table("issue_db").Where("project_id = ?", project_id).Find(&issues).Error
-	if err != nil {
+	
+	if err := db.Table("issues").Where("project_id = ?", project_id).Find(&issues).Error; err != nil {
 		fmt.Println(err)
 		return nil
 	}
+
 	return issues
+}
+
+func DeleteIssues(issue_id int) map[string]interface{} {
+	db := GetDB()
+	issue := &Issue{}
+	response := u.Message(false, "")
+	
+	if err := db.Table("issues").Where("id = ?", issue_id).First(&issue).Error; err != nil {
+		response = u.Message(false, "Issue not found")
+		return response
+	}
+	
+
+	
+	if err :=  db.Delete(&issue).Error;  err != nil {
+		response = u.Message(false, "Issue cannot be deleted")
+		return response
+	}
+
+	response = u.Message(true, "Issue has been deleted")
+	return response
+}
+
+func UpdateIssues(issue_id int, updated_issue *Issue) map[string]interface{} {
+	db := GetDB()
+	issue := &Issue{}
+	response := u.Message(false, "")
+	
+	if err := db.Table("issues").Where("id = ?", issue_id).First(&issue).Error; err != nil {
+		response = u.Message(false, "Issue not found")
+		return response
+	}
+	
+	issue.Name = updated_issue.Name
+	issue.Desc = updated_issue.Desc
+	issue.TaskType = updated_issue.TaskType
+	
+	db.Save(&issue)
+	response = u.Message(true, "Issue has been Updated")
+	return response
 }

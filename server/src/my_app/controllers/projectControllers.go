@@ -7,11 +7,13 @@ import (
 	"my_app/models"
 	u "my_app/utils"
 	"strconv"
+	"github.com/gorilla/mux"
 )
 
 var CreateProject = func(w http.ResponseWriter, r *http.Request) {
 
 	project := &models.Project{}
+	user_id := int(r.Context().Value("user").(uint))
 
 	err := json.NewDecoder(r.Body).Decode(project)
 	if err != nil {
@@ -19,18 +21,17 @@ var CreateProject = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user_id := r.Context().Value("user").(uint)
-	creator := int(user_id)
+	
 
-	resp := project.Create(creator)
+	resp := project.Create(user_id)
 	u.Respond(w, resp)
 }
 
 var GetProjectsFor = func(w http.ResponseWriter, r *http.Request) {
 
-	temp_id := r.Context().Value("user").(uint)
-	id := int(temp_id)
-	data := models.GetAllProjects(id)
+	user_id := int(r.Context().Value("user").(uint))
+	fmt.Println(user_id)
+	data := models.GetAllProjects(user_id)
 	resp := u.Message(true, "success")
 	resp["projects"] = data
 	u.Respond(w, resp)
@@ -41,23 +42,63 @@ var AddUserToProject = func(w http.ResponseWriter, r *http.Request) {
 
 	// extract IDs of project and user to be added
 	// from the header as string
-	proj_id_str, user_id_str := r.Header.Get("project_id"), r.Header.Get("user_id")
-
+	params := mux.Vars(r)
+	
+	
 	// extract the id of the user trying to add
 	// another user to this project
-	temp_user_id := r.Context().Value("user").(uint)
-	sender_user_id := int(temp_user_id)
+	sender_id := int(r.Context().Value("user").(uint))
 
 	// convert project and user id from string to int
-	proj_id, err := strconv.Atoi(proj_id_str)
+	project_id, err := strconv.Atoi(params["project_id"])
 	if err != nil {
 		panic(err)
 	}
-	user_id, err := strconv.Atoi(user_id_str)
+	user_id, err := strconv.Atoi(params["user_id"])
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(proj_id, user_id, sender_user_id)
-	resp := models.AddUserProjectToDb(proj_id, user_id, sender_user_id)
+
+	resp := models.AddUserProjectToDb(project_id, user_id, sender_id)
+	u.Respond(w, resp)
+}
+
+var DeleteProject = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	user_id := int(r.Context().Value("user").(uint))
+	project_id, err := strconv.Atoi(params["id"])
+	fmt.Println(project_id, user_id)
+	if err != nil {
+		fmt.Println(err)
+		u.Respond(w, u.Message(false, "problem converting project id specified at header"))
+	}
+	resp := models.DeleteProjects(project_id)
+	
+	u.Respond(w, resp)
+}
+
+var UpdateProject = func(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	
+	updated_project := &models.Project{}
+	
+	user_id := int(r.Context().Value("user").(uint))
+	fmt.Println(user_id)
+	
+	project_id, err := strconv.Atoi(params["id"])
+	
+	if err != nil {
+		fmt.Println(err)
+		u.Respond(w, u.Message(false, "problem converting project id specified at header"))
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(updated_project); err != nil {
+		fmt.Println(err)
+		u.Respond(w, u.Message(false, "Error while decoding request body"))
+		return
+	}
+
+	resp := models.UpdateProjects(project_id, updated_project)
+	
 	u.Respond(w, resp)
 }

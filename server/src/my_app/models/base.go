@@ -34,23 +34,23 @@ func init() {
 	db = conn
 
 	//check if the Database under use has the table name userdb
-	if !db.HasTable("user_db") {
-		db.Table("user_db").CreateTable(&Account{})
+	if !db.HasTable("users") {
+		db.Table("users").CreateTable(&Account{})
 	}
 
 	//check if database has projects table
-	if !db.HasTable("project_db") {
-		db.Table("project_db").CreateTable(&Project{})
+	if !db.HasTable("projects") {
+		db.Table("projects").CreateTable(&Project{})
 	}
 
 	//check if database has userprojects table
-	if !db.HasTable("project_participants_db") {
-		db.Table("project_participants_db").CreateTable(&UserProjectTable{})
+	if !db.HasTable("project_participants") {
+		db.Table("project_participants").CreateTable(&UserProjectTable{})
 	}
 
 	// check if database has issues table
-	if !db.HasTable("issue_db") {
-		db.Table("issue_db").CreateTable(&Issue{})
+	if !db.HasTable("issues") {
+		db.Table("issues").CreateTable(&Issue{})
 	}
 
 	//db.Debug().AutoMigrate(&Account{}, &Contact{})

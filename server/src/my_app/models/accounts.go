@@ -29,20 +29,20 @@ type Account struct {
 
 //Validate incoming user details...
 func (account *Account) Validate() (map[string]interface{}, bool) {
-
+	db := GetDB()
 	if len(account.Username) < 1 {
 		return u.Message(false, "Username is required"), false
 	}
 
 	if len(account.Password) < 6 {
-		return u.Message(false, "Password is required"), false
+		return u.Message(false, "Please enter the password of length more than 6"), false
 	}
 
 	//Email must be unique
 	temp := &Account{}
 
 	//check for errors, duplicate email
-	err := GetDB().Table("user_db").Where("email = ?", account.Email).First(temp).Error
+	err := db.Table("users").Where("email = ?", account.Email).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
@@ -52,7 +52,7 @@ func (account *Account) Validate() (map[string]interface{}, bool) {
 
 	temp = &Account{}
 	// check unique usaername
-	err = GetDB().Table("user_db").Where("username = ?", account.Username).First(temp).Error
+	err = db.Table("users").Where("username = ?", account.Username).First(temp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return u.Message(false, "Connection error. Please retry"), false
 	}
@@ -64,7 +64,7 @@ func (account *Account) Validate() (map[string]interface{}, bool) {
 }
 
 func (account *Account) Create() map[string]interface{} {
-
+	db := GetDB()
 	if resp, ok := account.Validate(); !ok {
 		return resp
 	}
@@ -78,7 +78,7 @@ func (account *Account) Create() map[string]interface{} {
 
 	account.JobType = "Intern"
 
-	GetDB().Table("user_db").Create(account)
+	db.Table("users").Create(account)
 
 	//Create new JWT token for the newly registered account
 	tk := &Token{UserId: account.ID}
@@ -94,9 +94,9 @@ func (account *Account) Create() map[string]interface{} {
 }
 
 func Login(username string, password string) map[string]interface{} {
-
+	db := GetDB()
 	account := &Account{}
-	err := GetDB().Table("user_db").Where("username = ?", username).First(account).Error
+	err := db.Table("users").Where("username = ?", username).First(account).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return u.Message(false, "Email address not found")
@@ -123,9 +123,9 @@ func Login(username string, password string) map[string]interface{} {
 }
 
 func GetUser(u uint) *Account {
-
+	db := GetDB()
 	acc := &Account{}
-	GetDB().Table("user_db").Where("id = ?", u).First(acc)
+	db.Table("users").Where("id = ?", u).First(acc)
 	if acc.Email == "" { //User not found!
 		return nil
 	}
