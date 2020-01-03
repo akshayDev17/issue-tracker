@@ -21,7 +21,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		//check if request does not need authentication, serve the request if it doesn't need it
 		for _, value := range notAuth {
-			fmt.Println("I AM HERE AT NO AUTH LOOP")
+			// fmt.Println("I AM HERE AT NO AUTH LOOP")
 
 			if value == requestPath {
 				next.ServeHTTP(w, r)
@@ -37,7 +37,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		// 	}
 		// }
 
-		fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
+		// fmt.Println("I AM HERE OUTSIDE NO AUTH LOOP")
 
 		response := make(map[string]interface{})
 

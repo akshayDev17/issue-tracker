@@ -122,14 +122,12 @@ func Login(username string, password string) map[string]interface{} {
 	return resp
 }
 
-func GetUser(u uint) *Account {
+func GetAllUsers() []*Account {
 
-	acc := &Account{}
-	GetDB().Table("user_db").Where("id = ?", u).First(acc)
-	if acc.Email == "" { //User not found!
-		return nil
+	accounts := make([]*Account, 0)
+	GetDB().Table("user_db").Find(&accounts)
+	for _,account := range accounts{
+		account.Password = ""
 	}
-
-	acc.Password = ""
-	return acc
+	return accounts
 }

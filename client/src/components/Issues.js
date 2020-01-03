@@ -27,7 +27,8 @@ export class Issues extends Component {
         this.state = {
             currentUser: authenticationService.currentUserValue,
             cards: [],
-            columns: []
+            columns: [],
+            project_id: this.props.location.state.project_id
         }
     }
     componentDidMount() {
@@ -71,12 +72,13 @@ export class Issues extends Component {
     render() {
         return (
             <div class="col-sm-12">
-                <h1>Issues for {this.props.location.state.project_name}</h1>
+                <h1>Issues for: {this.props.location.state.project_name}</h1>
                 <DndProvider backend={HTML5Backend}>
                     <Board
                         cards={this.state.cards}
                         columns={this.state.columns}
                         moveCard={this.moveCard}
+                        projectID={this.state.project_id}
                     />
                 </DndProvider>
             </div>

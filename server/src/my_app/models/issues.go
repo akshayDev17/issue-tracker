@@ -2,7 +2,9 @@ package models
 
 import (
 	"fmt"
+	"log"
 	u "my_app/utils"
+	"net/smtp"
 
 	"github.com/jinzhu/gorm"
 )
@@ -85,6 +87,35 @@ func (issue *Issue) Create() map[string]interface{} {
 
 	// add the issue to database
 	GetDB().Table("issue_db").Create(issue)
+
+	//------- send mail to the assigned user code START----------
+	from := "issuesender454@gmail.com"
+	pass := "abc123$%^"
+
+	// fetch email of the user the issue is being assigned to
+	assigned_user := &Account{}
+	GetDB().Table("user_db").Where("id = ?", issue.AssignedUserId).First(assigned_user)
+	to := assigned_user.Email
+
+	// fetch details of the project in which the new issue was created
+	temp_project := &Project{}
+	GetDB().Table("project_db").Where("id = ?", issue.ProjectID).First(temp_project)
+
+	body := "Greetings, " + assigned_user.Username + ". You have been assigned a new issue titled: " + issue.Name +
+		" for the project " + temp_project.Name + ". \n\n Regards."
+
+	msg := "From: " + from + "\n" +
+		"To: " + to + "\n" +
+		"Subject: New Issue has been assigned to you.\n\n" + body
+
+	err := smtp.SendMail("smtp.gmail.com:587",
+		smtp.PlainAuth("", from, pass, "smtp.gmail.com"),
+		from, []string{to}, []byte(msg))
+
+	if err != nil {
+		log.Printf("smtp error: %s", err)
+	}
+	//------- send mail to the assigned user code END----------
 
 	response := u.Message(true, "Issue has been created")
 	response["issue"] = issue

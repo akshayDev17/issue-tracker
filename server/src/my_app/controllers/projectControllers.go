@@ -3,9 +3,9 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"my_app/models"
 	u "my_app/utils"
+	"net/http"
 	"strconv"
 )
 
@@ -60,4 +60,18 @@ var AddUserToProject = func(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(proj_id, user_id, sender_user_id)
 	resp := models.AddUserProjectToDb(proj_id, user_id, sender_user_id)
 	u.Respond(w, resp)
+}
+
+// get all participants of a project
+var GetParticipants = func(w http.ResponseWriter, r *http.Request) {
+
+	// get project id from header
+	temp_pr_id := r.Header.Get("project_id")
+	project_id, err := strconv.Atoi(temp_pr_id)
+	if err != nil {
+		panic(err)
+	}
+	resp := models.GetProjectParticipants(project_id)
+	u.Respond(w, resp)
+
 }

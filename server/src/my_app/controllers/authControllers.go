@@ -34,3 +34,11 @@ var Authenticate = func(w http.ResponseWriter, r *http.Request) {
 	resp := models.Login(account.Username, account.Password)
 	u.Respond(w, resp)
 }
+
+var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
+		
+	data := models.GetAllUsers()
+	resp := u.Message(true, "success")
+	resp["accounts"] = data
+	u.Respond(w, resp)
+}

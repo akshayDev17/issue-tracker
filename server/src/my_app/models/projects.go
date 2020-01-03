@@ -32,7 +32,7 @@ func (project *Project) Validate() (map[string]interface{}, bool) {
 		return u.Message(false, "Project description cannot be empty!"), false
 	}
 
-	return u.Message(false, "Valid Issue created"), true
+	return u.Message(false, "Valid Project created"), true
 }
 
 func (project *Project) Create(creator_id int) map[string]interface{} {
@@ -54,7 +54,7 @@ func (project *Project) Create(creator_id int) map[string]interface{} {
 
 	GetDB().Table("project_participants_db").Create(project_user_entry)
 
-	response := u.Message(true, "Issue has been created")
+	response := u.Message(true, "Project has been created")
 	response["project"] = project
 	return response
 }
@@ -130,4 +130,26 @@ func AddUserProjectToDb(proj_id int, user_id int, sender_id int) map[string]inte
 	resp := u.Message(true, "Added User to project")
 	resp["user_project"] = user_project_entry
 	return resp
+}
+
+func GetProjectParticipants(project_id int) map[string]interface{} {
+	// get list of users for this project
+	participants := make([]*UserProjectTable, 0)
+	err := GetDB().Table("project_participants_db").Where("project_id = ?", project_id).Find(&participants).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return u.Message(false, "Invalid project ID given")
+		}
+		return u.Message(false, "Connection Error, please retry.")
+	}
+	participant_details := make([]*Account, 0)
+	for _, participant := range participants {
+		temp_user := &Account{}
+		GetDB().Table("user_db").Where("id = ?", participant.UserID).First(temp_user)
+		participant_details = append(participant_details, temp_user)
+	}
+	resp := u.Message(true, "Obtained Participant details")
+	resp["participants"] = participant_details
+	return resp
+
 }
