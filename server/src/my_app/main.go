@@ -29,7 +29,7 @@ func main() {
 	router.HandleFunc("/projects/new", controllers.CreateProject).Methods("POST")
 	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
 	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
-	router.HandleFunc("/projects/all_users", controllers.GetParticipants).Methods("POST")
+	router.HandleFunc("/projects/all_users", controllers.GetParticipants).Methods("GET")
 	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
 	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
 

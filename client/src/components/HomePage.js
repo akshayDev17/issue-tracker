@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import Button from 'react-bootstrap/Button';
 
 import Modal from 'react-bootstrap/Modal';
 
@@ -19,8 +20,10 @@ export class HomePage extends React.Component {
             displayProjectBox: false,
             userList: [],
             participantList: [],
+            nonParticipantList: [],
             canAddParticipants: false,
-            canDeleteParticipants: false
+            canDeleteParticipants: false,
+            canViewParticipants: false
         };
     }
 
@@ -59,16 +62,10 @@ export class HomePage extends React.Component {
     handleCloseParticipants = () => {
         this.setState({
             canAddParticipants: false,
-            canDeleteParticipants: false
+            canDeleteParticipants: false,
+            canViewParticipants: false
         });
     }
-
-    addParticipants = () => {
-        this.setState({
-            canAddParticipants: true
-        });
-    }
-
     deleteParticipants = () => {
         this.setState({
             canDeleteParticipants: true
@@ -82,7 +79,7 @@ export class HomePage extends React.Component {
                 <div class="container">
                     <Modal show={this.state.displayProjectBox} onHide={this.handleClose}>
                         <Modal.Header closeButton>
-                            <Modal.Title>Enter Prject Details</Modal.Title>
+                            <Modal.Title>Enter Project Details</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
                             <div className="container">
@@ -152,17 +149,52 @@ export class HomePage extends React.Component {
                                 <Modal.Title>Add Project Participants</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
-                                <form>
-                                    {this.state.participantList.map((member) => {
-                                        const username = member.username
-                                        const uid = member.ID
-                                        return <input key={uid} type="checkbox" >{username}</input>
-                                    })}
-                                </form>
-
+                                <ul className="list-group">
+                                    {
+                                        this.state.participantList.map((participant) => {
+                                            const username = participant.username
+                                            const uid = participant.ID
+                                            return <li key={uid} className="list-group-item">{username}<Button variant="success" id={uid + "add"} style={{ float: "right" }} disabled={true} onClick={() => {
+                                                console.log("Added user " + username)
+                                                console.log(document.getElementById(uid + "add"))
+                                            }}>Add</Button><Button variant="danger" style={{ float: "right", marginRight: "3px" }} disabled={false}>Delete</Button></li>
+                                        })
+                                    }
+                                    {
+                                        this.state.nonParticipantList.map((nonparticipant) => {
+                                            const username = nonparticipant.username
+                                            const uid = nonparticipant.ID
+                                            return <li key={uid} className="list-group-item">{username}<Button variant="success" id={uid + "add"} style={{ float: "right" }} disabled={false} onClick={() => {
+                                                console.log("Added user " + username)
+                                                console.log(document.getElementById(uid + "add"))
+                                            }}>Add</Button><Button variant="danger" style={{ float: "right", marginRight: "3px" }} disabled={true}>Delete</Button></li>
+                                        })
+                                    }
+                                </ul>
                             </Modal.Body>
                         </Modal>
                     }
+
+                    {/* The 3rd modal displays all users who are project participants */}
+                    {
+                        <Modal show={this.state.canViewParticipants} onHide={this.handleCloseParticipants}>
+                            <Modal.Header closeButton>
+                                <Modal.Title>Project Participants</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                <ul className="list-group">
+                                    {
+                                        this.state.participantList.map((participant) => {
+                                            const username = participant.username
+                                            const uid = participant.ID
+                                            return <li key={uid} className="list-group-item">{username}</li>
+                                        })
+                                    }
+                                </ul>
+                            </Modal.Body>
+                        </Modal>
+                    }
+                    {/* 3rd Modal code end */}
 
                     <h1>Hi {currentUser.data.account.username}!</h1>
                     <h3>Your Projects:</h3>
@@ -173,7 +205,41 @@ export class HomePage extends React.Component {
                                 const id = project.ID
                                 const curr_uid = currentUser.data.account.ID
                                 const isCreator = (curr_uid === project.created_user_id)
-                                return <li key={id} className="list-group-item"><Link key={id} to={{ pathname: '/issues', state: { project_id: id, project_name: name } }}  >{name}</Link>{isCreator && <button className="btn btn-success" style={{ float: "right" }} onClick={this.addParticipants}>Add Participants</button>}</li>
+                                return <li key={id} className="list-group-item"><Link key={id} to={{ pathname: '/issues', state: { project_id: id, project_name: name } }}  >{name}</Link>{isCreator && <Button variant="success" style={{ float: "right" }} onClick={() => {
+                                    const project_users_url = "/projects/all_users";
+                                    var header_object = authHeader();
+                                    header_object["project_id"] = id;
+                                    axios.get(project_users_url, { headers: header_object }).then((response) => {
+                                        const all_users_list = response.data.participants;
+                                        const all_users = this.state.userList;
+                                        var non_participants = [];
+                                        all_users.forEach((user) => {
+                                            var is_participant = false;
+                                            all_users_list.forEach((participant) => {
+                                                if(user.ID === participant.ID) {is_participant = true;}
+                                            });
+                                            if(!is_participant){non_participants.push(user);}
+                                        });
+                                        this.setState({
+                                            participantList: all_users_list,
+                                            nonParticipantList: non_participants
+                                        })
+                                    });
+                                    this.setState({
+                                        canAddParticipants: true
+                                    });
+                                }}>Add Participants</Button>}<Button variant="warning" style={{ float: "right", marginRight: "5px" }} onClick={() => {
+                                    const project_users_url = "/projects/all_users";
+                                    var header_object = authHeader();
+                                    header_object["project_id"] = id;
+                                    axios.get(project_users_url, { headers: header_object }).then((response) => {
+                                        const all_users_list = response.data.participants;
+                                        this.setState({
+                                            participantList: all_users_list,
+                                            canViewParticipants: true
+                                        });
+                                    });
+                                }}>View Participants</Button></li>
                             })
                         }
                     </div>

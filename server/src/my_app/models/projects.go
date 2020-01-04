@@ -146,6 +146,7 @@ func GetProjectParticipants(project_id int) map[string]interface{} {
 	for _, participant := range participants {
 		temp_user := &Account{}
 		GetDB().Table("user_db").Where("id = ?", participant.UserID).First(temp_user)
+		temp_user.Password = ""
 		participant_details = append(participant_details, temp_user)
 	}
 	resp := u.Message(true, "Obtained Participant details")

@@ -6,6 +6,7 @@ import (
 	"my_app/models"
 	u "my_app/utils"
 	"net/http"
+	"reflect"
 	"strconv"
 )
 
@@ -65,12 +66,12 @@ var AddUserToProject = func(w http.ResponseWriter, r *http.Request) {
 // get all participants of a project
 var GetParticipants = func(w http.ResponseWriter, r *http.Request) {
 
-	// get project id from header
 	temp_pr_id := r.Header.Get("project_id")
 	project_id, err := strconv.Atoi(temp_pr_id)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(reflect.TypeOf(project_id))
 	resp := models.GetProjectParticipants(project_id)
 	u.Respond(w, resp)
 
