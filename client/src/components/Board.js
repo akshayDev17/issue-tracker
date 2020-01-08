@@ -1,9 +1,8 @@
 import React from 'react';
 import { Column } from './Column';
 import { DraggableCard } from './Card';
-import Button from 'react-bootstrap/Button';
 
-export function Board({ cards, columns, moveCard, projectID }) {
+export function Board({ cards, columns, moveCard }) {
   return (
     <div className="Board col-sm-3">
       {columns.map(column => (
@@ -29,10 +28,6 @@ export function Board({ cards, columns, moveCard, projectID }) {
               moveCard={cardId => moveCard(cardId, column.id, 0)}
             />
           )}
-          <Button key={column.id} onClick={() => {
-            const add_issues_url = "/issues/new";
-            
-          }} variant="light" >Add Issue</Button>
         </Column>
       ))}
     </div>

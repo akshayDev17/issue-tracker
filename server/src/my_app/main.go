@@ -23,16 +23,25 @@ func main() {
 	)
 	router.Use(cors)
 
-	router.HandleFunc("/register", controllers.CreateAccount).Methods("POST")
-	router.HandleFunc("/login", controllers.Authenticate).Methods("POST", "OPTIONS")
-	router.HandleFunc("/users/all", controllers.GetAllUsers).Methods("POST")
-	router.HandleFunc("/projects/new", controllers.CreateProject).Methods("POST")
-	router.HandleFunc("/projects/all", controllers.GetProjectsFor).Methods("GET")
-	router.HandleFunc("/projects/add_user", controllers.AddUserToProject).Methods("POST")
-	router.HandleFunc("/projects/all_users", controllers.GetParticipants).Methods("GET")
-	router.HandleFunc("/issues/new", controllers.CreateIssue).Methods("POST")
-	router.HandleFunc("/issues/all", controllers.GetIssuesFor).Methods("GET")
-
+	// User Routes
+	router.HandleFunc("/register", controllers.Register).Methods("POST")
+	router.HandleFunc("/login", controllers.Login).Methods("POST", "OPTIONS")
+	router.HandleFunc("/all_users", controllers.GetAllUsers).Methods("GET")
+	// Project Routes
+	router.HandleFunc("/project/new", controllers.CreateProject).Methods("POST")
+	router.HandleFunc("/project/all", controllers.GetProjectsFor).Methods("GET")
+	router.HandleFunc("/project/{id}/all_users", controllers.GetParticipants).Methods("GET")
+	router.HandleFunc("/project/{project_id}/add/user/{user_id}", controllers.AddUserToProject).Methods("POST")
+	router.HandleFunc("/project/{project_id}/delete/user/{user_id}", controllers.DeleteUserFromProject).Methods("DELETE")
+	router.HandleFunc("/project/{id}/delete", controllers.DeleteProject).Methods("DELETE")
+	router.HandleFunc("/project/{id}/update", controllers.UpdateProject).Methods("POST")
+	//Issue Routes
+	router.HandleFunc("/project/{project_id}/issue/new", controllers.CreateIssue).Methods("POST")
+	router.HandleFunc("/project/{project_id}/issue/{issue_id}/assign_to_me", controllers.AssignIssueToMe).Methods("POST")
+	router.HandleFunc("/project/{project_id}/issue/list", controllers.GetAllIssues).Methods("GET")
+	router.HandleFunc("/project/{project_id}/issue/unassigned_list", controllers.UnassignedIssues).Methods("GET")
+	router.HandleFunc("/project/{project_id}/issue/{issue_id}/delete", controllers.DeleteIssue).Methods("DELETE")
+	router.HandleFunc("/project/{project_id}/issue/{issue_id}/update", controllers.UpdateIssue).Methods("POST")
 	router.Use(app.JwtAuthentication) //attach JWT auth middleware
 
 	//router.NotFoundHandler = app.NotFoundHandler
