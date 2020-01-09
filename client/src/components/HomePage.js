@@ -156,9 +156,29 @@ export class HomePage extends React.Component {
                                         const username = participant.username
                                         const uid = participant.ID
                                         return <li key={uid} className="list-group-item">{username}<Button variant="success" id={uid + "add"} style={{ float: "right" }} disabled={true} onClick={() => {
-                                        }}>Add</Button><Button variant="danger" style={{ float: "right", marginRight: "3px" }} disabled={false} onClick={
-                                            console.log("KKKKKK")
-                                        }>Delete</Button></li>
+                                        }}>Add</Button><Button variant="danger" style={{ float: "right", marginRight: "3px" }} disabled={false} onClick={ () => {
+                                            var newNonParticipantList = this.state.nonParticipantList;
+                                            newNonParticipantList.push(participant);
+                                            const curr_user_list = this.state.userList;
+                                            var newParticipantList = [];
+                                            curr_user_list.forEach((user) => {
+                                                var isParticipant = true;
+                                                newNonParticipantList.forEach((non_participant) => {
+                                                    if(non_participant.ID == user.ID){
+                                                        isParticipant = false;
+                                                    }
+                                                });
+                                                if(isParticipant){newParticipantList.push(user);}
+                                            });
+                                            const proj_id = this.state.currProjectID;
+                                            const remove_user_from_project = "/project/" + proj_id + "/delete/user/" + uid;
+                                            axios.delete(remove_user_from_project, { headers: authHeader() });
+                                            this.setState({
+                                                participantList: newParticipantList,
+                                                nonParticipantList: newNonParticipantList
+                                            });
+
+                                        }}>Delete</Button></li>
                                     })
                                 }
                                 {
