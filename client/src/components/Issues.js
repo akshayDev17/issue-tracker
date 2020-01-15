@@ -18,24 +18,12 @@ import * as Yup from 'yup';
 import '../index.css';
 
 import { authenticationService } from '../services/authentication.service';
-import { authHeader } from '../auth-header';
+import { createIssue } from '../services/createIssue.service';
+import { AssignIssue } from '../services/assignIssue.service';
+import { authHeader } from '../helpers/auth-header';
 import { Board } from './Board';
 
-function get_issues_array(unformatted_issue_list, i) {
-    var temp_array = [];
-    unformatted_issue_list.forEach((issue) => {
-        if (issue.ID === i) {
-            temp_array.push(issue.ID);
-        }
-    });
-    return temp_array;
-}
-
-function handleClick(issue) {
-    const assign_issue_url = "/project/" + issue.project_id + "/issue/" + issue.ID + "/assign_to_me";
-    authHeader();
-    axios.post(assign_issue_url, {}, { headers: authHeader() });
-}
+import get_issues_array from '../helpers/issue_helpers.js';
 
 export class Issues extends Component {
     constructor(props) {
@@ -74,11 +62,12 @@ export class Issues extends Component {
                 id: unformatted_issue.ID,
                 title: unformatted_issue.name
             }));
-            const column_list = ['Sub-Task', 'Bug', 'Epic', 'Improvement', 'New Feature', 'Story', 'Task'].map((title, i) => ({
-                id: i,
+            const column_list = ['Sub-Task', 'Bug', 'Epic', 'Improvement', 'New Feature', 'Story', 'Task'].map( function(title, i) {
+                return {id: i,
                 title,
-                cardIds: get_issues_array(unformatted_issue_list, i),
-            }));
+                cardIds: get_issues_array(unformatted_issue_list, i)}
+            });
+            console.log(column_list);
             this.setState({
                 cards: card_list,
                 columns: column_list
@@ -126,7 +115,7 @@ export class Issues extends Component {
     };
     render() {
         return (
-            <div class="col-sm-12">
+            <div className="col-sm-12">
                 <h1>Issues for: {this.props.location.state.project_name}</h1>
                 <DndProvider backend={HTML5Backend}>
                     <Board
@@ -157,39 +146,45 @@ export class Issues extends Component {
                                 onSubmit={({ issueName, issueDesc, assignedTo, taskType }, { setStatus, setSubmitting }) => {
                                     setStatus();
                                     const project_id = this.state.project_id;
-                                    const add_issue_url = "/project/" + project_id + "/issue/new";
                                     if (!assignedTo) { assignedTo = 0; }
                                     taskType = Number(taskType);
                                     assignedTo = Number(assignedTo);
-                                    authHeader();
+                                    if (isNaN(taskType)) {
+                                        taskType = 0;
+                                    }
                                     const requestOptions = {
                                         "name": issueName,
                                         "desc": issueDesc,
                                         "assigned_to": assignedTo,
                                         "task_type": taskType
                                     };
-                                    axios.post(add_issue_url, requestOptions, { headers: authHeader() }).then((response) => {
-                                        const new_issue = response.data.issue;
-                                        if (new_issue.assigned_to === 0) {
-                                            var unassigned_list = this.state.unassigned_issues;
-                                            unassigned_list.push(new_issue);
-                                            this.setState({
-                                                unassigned_issues: unassigned_list
-                                            });
-                                        }
-                                        else {
-                                            const this_user_id = this.state.currentUser.ID;
-                                            if (new_issue.assigned_to === this_user_id) {
-                                                var old_card_list = this.state.cards;
-                                                var old_column_list = this.state.columns;
-                                                old_card_list.push({id: new_issue.ID, title: new_issue.name})
+                                    console.log(requestOptions);
+                                    createIssue(requestOptions, project_id).then(
+                                        issue => {
+                                            if (issue.assigned_to === 0) {
+                                                var unassigned_list = this.state.unassigned_issues;
+                                                unassigned_list.push(issue);
+                                                this.setState({
+                                                    unassigned_issues: unassigned_list
+                                                });
                                             }
+                                            else {
+                                                const this_user_id = this.state.currentUser.ID;
+                                                if (issue.assigned_to === this_user_id) {
+                                                    var old_card_list = this.state.cards;
+                                                    // var old_column_list = this.state.columns;
+                                                    old_card_list.push({ id: issue.ID, title: issue.name })
+                                                    this.setState({cards: old_card_list});
+                                                }
+                                            }
+                                        },
+                                        error => {
+                                            setStatus(error);
                                         }
-                                    });
+                                    );
+                                    this.setState({canAddIssue: false});
                                     setSubmitting(false);
-                                    this.setState({
-                                        canAddIssue: false
-                                    });
+
                                 }}
                                 render={({ errors, status, touched, isSubmitting }) => (
                                     <Form>
@@ -242,7 +237,24 @@ export class Issues extends Component {
                 <ul className="list-group" style={{ marginTop: "30px" }}>
                     {
                         this.state.unassigned_issues.map((issue) => {
-                            return <li className="list-group-item">{issue.name}<Button variant="success" style={{ float: "right" }} onClick={handleClick(issue)}>Assign To Me</Button></li>
+                            return <li className="list-group-item" key={issue.ID} >{issue.name}<Button variant="success"  style={{ float: "right" }} onClick={() => {
+                                AssignIssue(issue).then(
+                                    ok => {
+                                        var unassignedIssueList = this.state.unassigned_issues;
+                                        unassignedIssueList = unassignedIssueList.filter((unassigned_issue) => {
+                                            return (unassigned_issue.ID === issue.ID);
+                                        });
+                                        var curr_issue_list = this.state.assigned_issues;
+                                        curr_issue_list.push(issue);
+                                        console.log(curr_issue_list);
+                                        this.setState({
+                                            assigned_issues: curr_issue_list,
+                                            unassigned_issues: unassignedIssueList
+                                        });
+                                    },
+                                    error => {console.error(error);}
+                                );
+                            }}>Assign To Me</Button></li>
                         })
                     }
                 </ul>

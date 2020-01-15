@@ -16,3 +16,20 @@ export function handleResponse(response) {
 
     return data;
 }
+
+export function handleCreateIssueResponse(response) {
+    if(!response.data.status) {
+        const error = response.data.message;
+        return Promise.reject(error);
+    }
+    const data = response.data.issue;
+    return data;
+}
+
+export function handleAssignIssueResponse(response) {
+    if(!response.data.status) {
+        const error = response.data.message;
+        return Promise.reject(error);
+    }
+    return true;
+}

@@ -8,22 +8,46 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 import { authenticationService } from '../services/authentication.service';
-import { authHeader } from '../auth-header';
+import { authHeader } from '../helpers/auth-header';
 
 export class HomePage extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            // store currently logged in user details for displaying 
+            // their projects and priveleges regarding the same
             currentUser: authenticationService.currentUserValue,
+            
+            // initialise list of projects the currently
+            // logged-in user is a part of
             project_list: [],
+            
+            // variable to decide whether to display the Add-project modal box
             displayProjectBox: false,
+            
+            /* fetch all signed-up users, 
+            to decide non-participants for a project */
             userList: [],
+
+            /* initialise the participants-list for a project,
+            which the currently logged-in user would want to see */
             participantList: [],
+
+            /* initialize a list of non-participants w.r.t.
+            a project, so as to display add-delete user from
+            a project functionality which will be basically
+            equal to userList-participantList */
             nonParticipantList: [],
+
+            /* open modal box for editing participants of
+            a project  */
             canAddParticipants: false,
-            canDeleteParticipants: false,
+
+            /* open modal box for viewing 
+            project participants */
             canViewParticipants: false,
+            
             // store current project ID to edit participants
             currProjectID: 0
         };
@@ -64,13 +88,7 @@ export class HomePage extends React.Component {
     handleCloseParticipants = () => {
         this.setState({
             canAddParticipants: false,
-            canDeleteParticipants: false,
             canViewParticipants: false
-        });
-    }
-    deleteParticipants = () => {
-        this.setState({
-            canDeleteParticipants: true
         });
     }
 
@@ -164,7 +182,7 @@ export class HomePage extends React.Component {
                                             curr_user_list.forEach((user) => {
                                                 var isParticipant = true;
                                                 newNonParticipantList.forEach((non_participant) => {
-                                                    if(non_participant.ID == user.ID){
+                                                    if(non_participant.ID === user.ID){
                                                         isParticipant = false;
                                                     }
                                                 });
