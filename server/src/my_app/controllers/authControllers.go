@@ -36,7 +36,7 @@ var Login = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var GetAllUsers = func(w http.ResponseWriter, r *http.Request) {
-		
+
 	data := models.GetAllUsers()
 	resp := u.Message(true, "success")
 	resp["accounts"] = data

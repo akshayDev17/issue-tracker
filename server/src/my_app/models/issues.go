@@ -208,7 +208,6 @@ func DeleteIssues(issue_id int) map[string]interface{} {
 	db := GetDB()
 	issue := &Issue{}
 	response := u.Message(false, "")
-
 	if err := db.Table("issues").Where("id = ?", issue_id).First(&issue).Error; err != nil {
 		response = u.Message(false, "Issue not found")
 		return response
@@ -227,7 +226,6 @@ func UpdateIssues(issue_id int, updated_issue *Issue) map[string]interface{} {
 	db := GetDB()
 	issue := &Issue{}
 	response := u.Message(false, "")
-
 	if err := db.Table("issues").Where("id = ?", issue_id).First(&issue).Error; err != nil {
 		response = u.Message(false, "Issue not found")
 		return response

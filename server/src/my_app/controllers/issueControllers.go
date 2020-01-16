@@ -61,24 +61,20 @@ var DeleteIssue = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	issue_id, err := strconv.Atoi(params["issue_id"])
 	user_id := int(r.Context().Value("user").(uint))
-
 	fmt.Println(issue_id, user_id)
 	if err != nil {
 		fmt.Println(err)
 		u.Respond(w, u.Message(false, "problem converting issue id specified at header"))
 	}
 	resp := models.DeleteIssues(issue_id)
-
 	u.Respond(w, resp)
 }
 
 var UpdateIssue = func(w http.ResponseWriter, r *http.Request) {
-
 	updated_issue := &models.Issue{}
 	user_id := int(r.Context().Value("user").(uint))
 	params := mux.Vars(r)
 	issue_id, err := strconv.Atoi(params["issue_id"])
-
 	if err != nil {
 		fmt.Println(err)
 		u.Respond(w, u.Message(false, "problem converting issue id specified at header"))

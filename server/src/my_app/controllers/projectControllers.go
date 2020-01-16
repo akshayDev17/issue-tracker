@@ -15,7 +15,6 @@ import (
 var CreateProject = func(w http.ResponseWriter, r *http.Request) {
 
 	project := &models.Project{}
-
 	user_id := int(r.Context().Value("user").(uint))
 
 	err := json.NewDecoder(r.Body).Decode(project)
@@ -136,6 +135,5 @@ var UpdateProject = func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := models.UpdateProjects(project_id, updated_project)
-
 	u.Respond(w, resp)
 }

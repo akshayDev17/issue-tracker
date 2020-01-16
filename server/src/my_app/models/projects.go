@@ -27,7 +27,11 @@ func (project *Project) Validate() (map[string]interface{}, bool) {
 		return u.Message(false, "Project name cannot be empty!"), false
 	}
 
+<<<<<<< HEAD
 	// check for empty issue description
+=======
+	// check for empty project description
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	if len(project.Desc) == 0 {
 		return u.Message(false, "Project description cannot be empty!"), false
 	}
@@ -36,7 +40,10 @@ func (project *Project) Validate() (map[string]interface{}, bool) {
 }
 
 func (project *Project) Create(creator_id int) map[string]interface{} {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	db := GetDB()
 	// validate project
 	if resp, ok := project.Validate(); !ok {
@@ -63,7 +70,10 @@ func (project *Project) Create(creator_id int) map[string]interface{} {
 
 // given a user, fetch all projects related to it
 func GetAllProjects(user_id int) []*Project {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	db := GetDB()
 	// get the project-id-list a user is involved in
 	project_id_list_uint := make([]*UserProjectTable, 0)
@@ -74,19 +84,31 @@ func GetAllProjects(user_id int) []*Project {
 	}
 	// initialize the projects array
 	projects := make([]*Project, 0)
+<<<<<<< HEAD
 
+=======
+	fmt.Println(project_id_list_uint[0].ProjectID)
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	// fetch the project info for all projects that
 	// were just extracted from project-participants table
 	for _, project_id := range project_id_list_uint {
 		curr_project := &Project{}
 		db.Table("projects").Where("id = ?", project_id.ProjectID).First(curr_project)
+<<<<<<< HEAD
 		projects = append(projects, curr_project)
 	}
+=======
+		
+		projects = append(projects, curr_project)
+	}
+	fmt.Println(projects)
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	return projects
 }
 
 // add user to a project, and add this pair to the DB
 func AddUserProjectToDb(proj_id int, user_id int, sender_id int) map[string]interface{} {
+<<<<<<< HEAD
 
 	db := GetDB()
 	// extract project info for the project-id provided
@@ -147,6 +169,8 @@ func AddUserProjectToDb(proj_id int, user_id int, sender_id int) map[string]inte
 // delete user from a project
 func DeleteUserProjectFromDb(proj_id int, user_id int, sender_id int) map[string]interface{} {
 
+=======
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	db := GetDB()
 	// extract project info for the project-id provided
 	project := &Project{}
@@ -174,10 +198,15 @@ func DeleteUserProjectFromDb(proj_id int, user_id int, sender_id int) map[string
 
 	// extract project-owner for the above provided project
 	project_owner := project.CreatedBy
+<<<<<<< HEAD
+=======
+	fmt.Println(project_owner, sender_id)
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	if project_owner != sender_id {
 		return u.Message(false, "Warning!! A non-owner has requested for addition of a user to a project")
 	}
 
+<<<<<<< HEAD
 	// check if the user is actually a member of the project
 	err = db.Table("project_participants").Where("project_id = ?", proj_id).Where("user_id = ?", user_id).Error
 	if err != nil {
@@ -254,19 +283,62 @@ func DeleteProjects(user_id int, project_id int) map[string]interface{} {
 	}
 
 	response := u.Message(true, "Project has been deleted")
+=======
+	// add the user as a member of the project
+	user_project_entry := &UserProjectTable{
+		ProjectID: proj_id,
+		UserID:    user_id,
+	}
+	//user_project_entry.UserID, user_project_entry.ProjectID := user_id, proj_id
+	db.Table("project_participants").Create(user_project_entry)
+
+	resp := u.Message(true, "Added User to project")
+	resp["user_project"] = user_project_entry
+	return resp
+}
+
+func DeleteProjects(project_id int) map[string]interface{} {
+	db := GetDB()
+	project := &Project{}
+	
+	response := u.Message(false, "")
+	
+	if err := db.Table("project_participants").Where("project_id = ?", project_id).Delete(&UserProjectTable{}).Error; err != nil {
+		response = u.Message(false, "Project not found")
+		return response
+	}
+
+	if err := db.Table("projects").Where("id = ?", project_id).First(&project).Error; err != nil {
+		response = u.Message(false, "Project not found")
+		return response
+	}
+	
+	if err :=  db.Delete(&project).Error;  err != nil {
+		response = u.Message(false, "Project cannot be deleted")
+		return response
+	}
+
+	response = u.Message(true, "Project has been deleted")
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	return response
 }
 
 func UpdateProjects(project_id int, updated_project *Project) map[string]interface{} {
+<<<<<<< HEAD
 
 	db := GetDB()
 
+=======
+	db := GetDB()
+	
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe
 	if resp, ok := updated_project.Validate(); !ok {
 		return resp
 	}
 
 	project := &Project{}
 	response := u.Message(false, "")
+<<<<<<< HEAD
 
 	if err := db.Table("projects").Where("id = ?", project_id).First(project).Error; err != nil {
 		response = u.Message(false, "Project not found")
@@ -280,3 +352,18 @@ func UpdateProjects(project_id int, updated_project *Project) map[string]interfa
 	response = u.Message(true, "Project has been Updated")
 	return response
 }
+=======
+	
+	if err := db.Table("projects").Where("id = ?", project_id).First(&project).Error; err != nil {
+		response = u.Message(false, "Project not found")
+		return response
+	}
+	
+	project.Name = updated_project.Name
+	project.Desc = updated_project.Desc
+	
+	db.Save(&project)
+	response = u.Message(true, "Project has been Updated")
+	return response
+}
+>>>>>>> 2de91c76d52091262f14249c10c8e054da5fc7fe

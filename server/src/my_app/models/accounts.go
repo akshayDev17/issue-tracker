@@ -64,7 +64,6 @@ func (account *Account) Validate() (map[string]interface{}, bool) {
 }
 
 func (account *Account) Create() map[string]interface{} {
-
 	db := GetDB()
 	if resp, ok := account.Validate(); !ok {
 		return resp
@@ -95,7 +94,6 @@ func (account *Account) Create() map[string]interface{} {
 }
 
 func Login(username string, password string) map[string]interface{} {
-
 	db := GetDB()
 	account := &Account{}
 	err := db.Table("users").Where("username = ?", username).First(account).Error
