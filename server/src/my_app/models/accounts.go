@@ -99,7 +99,7 @@ func Login(username string, password string) map[string]interface{} {
 	err := db.Table("users").Where("username = ?", username).First(account).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return u.Message(false, "Email address not found")
+			return u.Message(false, "Username does not exist")
 		}
 		return u.Message(false, "Connection error. Please retry")
 	}
@@ -122,14 +122,13 @@ func Login(username string, password string) map[string]interface{} {
 	return resp
 }
 
-func GetUser(u uint) *Account {
-	db := GetDB()
-	acc := &Account{}
-	db.Table("users").Where("id = ?", u).First(acc)
-	if acc.Email == "" { //User not found!
-		return nil
-	}
+func GetAllUsers() []*Account {
 
-	acc.Password = ""
-	return acc
+	db = GetDB()
+	accounts := make([]*Account, 0)
+	db.Table("users").Find(&accounts)
+	for _, account := range accounts {
+		account.Password = ""
+	}
+	return accounts
 }

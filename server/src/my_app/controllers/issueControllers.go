@@ -7,6 +7,7 @@ import (
 	u "my_app/utils"
 	"net/http"
 	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -14,10 +15,11 @@ var CreateIssue = func(w http.ResponseWriter, r *http.Request) {
 
 	//Grab the id of the user that send the request
 	// i.e. created the issue
+	user_id := int(r.Context().Value("user").(uint))
+
 	params := mux.Vars(r)
 	project_id, err := strconv.Atoi(params["project_id"])
-	
-	user_id := int(r.Context().Value("user").(uint))
+
 	issue := &models.Issue{}
 
 	// json data should have the id of user to whom the issue
@@ -31,8 +33,8 @@ var CreateIssue = func(w http.ResponseWriter, r *http.Request) {
 	}
 
 	issue.CreatedBy = user_id
-	issue.ProjectID = project_id 
-	
+	issue.ProjectID = project_id
+
 	resp := issue.Create()
 	u.Respond(w, resp)
 }
@@ -59,24 +61,20 @@ var DeleteIssue = func(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	issue_id, err := strconv.Atoi(params["issue_id"])
 	user_id := int(r.Context().Value("user").(uint))
-	
 	fmt.Println(issue_id, user_id)
 	if err != nil {
 		fmt.Println(err)
 		u.Respond(w, u.Message(false, "problem converting issue id specified at header"))
 	}
 	resp := models.DeleteIssues(issue_id)
-	
 	u.Respond(w, resp)
 }
 
 var UpdateIssue = func(w http.ResponseWriter, r *http.Request) {
-	
 	updated_issue := &models.Issue{}
 	user_id := int(r.Context().Value("user").(uint))
 	params := mux.Vars(r)
 	issue_id, err := strconv.Atoi(params["issue_id"])
-	
 	if err != nil {
 		fmt.Println(err)
 		u.Respond(w, u.Message(false, "problem converting issue id specified at header"))
@@ -88,9 +86,42 @@ var UpdateIssue = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	fmt.Println(issue_id, user_id)
 	resp := models.UpdateIssues(issue_id, updated_issue)
-	
+
 	u.Respond(w, resp)
+}
+
+var AssignIssueToMe = func(w http.ResponseWriter, r *http.Request) {
+	// get user id from context
+	user_id := int(r.Context().Value("user").(uint))
+
+	params := mux.Vars(r)
+	issue_id, err := strconv.Atoi(params["issue_id"])
+	if err != nil {
+		fmt.Println(err)
+		u.Respond(w, u.Message(false, "problem converting issue id specified at header"))
+	}
+
+	resp := models.AssignIssue(issue_id, user_id)
+	u.Respond(w, resp)
+
+}
+
+var UnassignedIssues = func(w http.ResponseWriter, r *http.Request) {
+	// get user id from context
+	user_id := int(r.Context().Value("user").(uint))
+
+	params := mux.Vars(r)
+	project_id, err := strconv.Atoi(params["project_id"])
+	if err != nil {
+		fmt.Println(err)
+		u.Respond(w, u.Message(false, "Problem fetching project id"))
+	}
+
+	issues := models.GetUnassignedIssues(project_id, user_id)
+	response := u.Message(true, "List of unassigned issues")
+	response["issues"] = issues
+	u.Respond(w, response)
+
 }

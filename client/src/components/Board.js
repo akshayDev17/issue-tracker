@@ -1,8 +1,8 @@
 import React from 'react';
-import {Column} from './Column';
-import {DraggableCard} from './Card';
+import { Column } from './Column';
+import { DraggableCard } from './Card';
 
-export function Board({cards, columns, moveCard}) {
+export function Board({ cards, columns, moveCard }) {
   return (
     <div className="Board col-sm-3">
       {columns.map(column => (

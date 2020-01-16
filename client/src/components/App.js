@@ -37,16 +37,16 @@ export class App extends React.Component {
             <nav className="navbar navbar-expand navbar-dark bg-dark">
               <div className="navbar-nav">
                 <Link to="/" className="nav-item nav-link">Home</Link>
-                <a onClick={this.logout} className="nav-item nav-link">Logout</a>
+                <a onClick={this.logout} href="#" className="nav-item nav-link">Logout</a>
               </div>
             </nav>
           }
           <div className="jumbotron">
             <div className="container">
-                  <PrivateRoute exact path="/" component={HomePage} />
-                  <Route path="/login" component={LoginPage} />
-                  <Route path="/signup" component={SignUpPage}/>
-                  <Route path="/issues" component={Issues} />
+              <PrivateRoute exact path="/" component={HomePage} />
+              <Route path="/login" component={LoginPage} />
+              <Route path="/signup" component={SignUpPage} />
+              <Route path="/issues" component={Issues} />
             </div>
           </div>
         </div>
